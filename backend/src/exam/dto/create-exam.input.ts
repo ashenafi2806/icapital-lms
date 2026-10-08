@@ -12,6 +12,10 @@ import { QuestionInput } from './question.input.js';
 
 @InputType()
 export class CreateExamInput {
+  @Field()
+  @IsNotEmpty()
+  title!: string;
+
   @Field(() => ID)
   @IsUUID()
   courseId!: string;

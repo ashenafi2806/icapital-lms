@@ -6,6 +6,9 @@ export class ExamType {
   @Field(() => ID)
   id!: string;
 
+  @Field()
+  title!: string;
+
   @Field(() => ID)
   courseId!: string;
 

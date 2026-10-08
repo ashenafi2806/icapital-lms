@@ -38,6 +38,7 @@ export class ExamService {
     const exam = await this.prisma.exam.create({
       data: {
         courseId: input.courseId,
+        title: input.title,
         passingThreshold: input.passingThreshold,
         questions,
       },
@@ -46,6 +47,7 @@ export class ExamService {
     return {
       id: exam.id,
       courseId: exam.courseId,
+      title: exam.title,
       passingThreshold: exam.passingThreshold,
       questions: this.parseQuestions(exam.questions),
     };

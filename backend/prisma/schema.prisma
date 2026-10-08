@@ -50,6 +50,7 @@ model Exam {
   courseId          String
   course            Course        @relation(fields: [courseId], references: [id])
 
+  title             String
   passingThreshold  Float
   questions         Json
 

@@ -22,18 +22,27 @@ export class CourseService {
       data: input,
     });
 
-    return { ...course, examsCount: 0 };
+    return { ...course, examsCount: 0, exams: [] };
   }
 
   async findAll(): Promise<CourseType[]> {
     const courses = await this.prisma.course.findMany({
       orderBy: { stepOrder: 'asc' },
-      include: { _count: { select: { exams: true } } },
+      include: {
+        _count: { select: { exams: true } },
+        exams: { select: { id: true, title: true, passingThreshold: true, questions: true } },
+      },
     });
 
-    return courses.map(({ _count, ...course }) => ({
+    return courses.map(({ _count, exams, ...course }) => ({
       ...course,
       examsCount: _count.exams,
+      exams: exams.map((exam) => ({
+        id: exam.id,
+        title: exam.title,
+        passingThreshold: exam.passingThreshold,
+        questionCount: Array.isArray(exam.questions) ? exam.questions.length : 0,
+      })),
     }));
   }
 }
