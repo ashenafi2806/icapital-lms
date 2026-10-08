@@ -1,0 +1,112 @@
+﻿datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  STUDENT
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  role         Role     @default(STUDENT)
+
+  progress StudentProgress[]
+  attempts ExamAttempt[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Course {
+  id          String @id @default(uuid())
+  title       String
+  description String
+  stepOrder   Int    @unique
+
+  exams    Exam[]
+  progress StudentProgress[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Exam {
+  id           String @id @default(uuid())
+  courseId     String
+  course       Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title        String
+  order        Int    @default(0)
+  passingScore Int    // percentage, 0-100
+
+  questions Question[]
+  attempts  ExamAttempt[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+}
+
+model Question {
+  id           String   @id @default(uuid())
+  examId       String
+  exam         Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  text         String
+  options      String[]
+  correctIndex Int      // NEVER expose to students
+  order        Int      @default(0)
+
+  @@index([examId])
+}
+
+model StudentProgress {
+  id       String @id @default(uuid())
+  userId   String
+  courseId String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  status        ProgressStatus @default(NOT_STARTED)
+  bestScore     Int?           // best score across the course's exam attempts
+  attemptsCount Int            @default(0)
+  completedAt   DateTime?
+
+  attempts ExamAttempt[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+}
+
+model ExamAttempt {
+  id         String          @id @default(uuid())
+  userId     String
+  examId     String
+  progressId String
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exam       Exam            @relation(fields: [examId], references: [id], onDelete: Cascade)
+  progress   StudentProgress @relation(fields: [progressId], references: [id], onDelete: Cascade)
+
+  score       Int
+  isPassed    Boolean
+  attemptedAt DateTime @default(now())
+
+  @@index([userId, examId])
+}
