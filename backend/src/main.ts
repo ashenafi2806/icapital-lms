@@ -11,6 +11,7 @@ async function bootstrap() {
     origin: [
       'https://icapital-9r908mpwh-ashenafibizukork-gmailcoms-projects.vercel.app/login'
     ],
+    credentials: true,
   });
   await app.listen(process.env.PORT ?? 3000);
 }
