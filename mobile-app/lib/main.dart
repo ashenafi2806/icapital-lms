@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'features/auth/providers/auth_provider.dart';
+import 'features/auth/screens/login_screen.dart';
+import 'features/auth/screens/splash_screen.dart';
 
 void main() {
   runApp(const ProviderScope(child: LmsStudentApp()));
@@ -20,10 +22,11 @@ class LmsStudentApp extends ConsumerWidget {
         useMaterial3: true,
       ),
       home: auth.when(
-        loading: () => const _PlaceholderScreen(text: 'Loading...'),
+        loading: () => const SplashScreen(),
         error: (error, _) => _PlaceholderScreen(text: error.toString()),
-        data: (session) =>
-            _PlaceholderScreen(text: session == null ? 'Login' : 'Courses'),
+        data: (session) => session == null
+            ? const LoginScreen()
+            : const _PlaceholderScreen(text: 'Courses'),
       ),
     );
   }
