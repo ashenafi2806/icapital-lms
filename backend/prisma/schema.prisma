@@ -1,0 +1,100 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  STUDENT
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+model User {
+  id           String            @id @default(uuid())
+  email        String            @unique
+  passwordHash String
+  role         Role              @default(STUDENT)
+
+  progress     StudentProgress[]
+  attempts     ExamAttempt[]
+
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+}
+
+model Course {
+  id          String            @id @default(uuid())
+  title       String
+  description String
+  stepOrder   Int
+
+  exams       Exam[]
+  progress    StudentProgress[]
+
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model Exam {
+  id                String        @id @default(uuid())
+
+  courseId          String
+  course            Course        @relation(fields: [courseId], references: [id])
+
+  passingThreshold  Float
+  questions         Json
+
+  attempts          ExamAttempt[]
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+model StudentProgress {
+  id          String         @id @default(uuid())
+
+  userId      String
+  courseId    String
+
+  user        User           @relation(fields: [userId], references: [id])
+  course      Course         @relation(fields: [courseId], references: [id])
+
+  status      ProgressStatus @default(NOT_STARTED)
+  score       Float?
+  isPassed    Boolean        @default(false)
+
+  completedAt DateTime?
+
+  attempts    ExamAttempt[]
+
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@unique([userId, courseId])
+}
+
+model ExamAttempt {
+  id          String          @id @default(uuid())
+
+  userId      String
+  examId      String
+  progressId  String
+
+  user        User            @relation(fields: [userId], references: [id])
+  exam        Exam            @relation(fields: [examId], references: [id])
+  progress    StudentProgress @relation(fields: [progressId], references: [id])
+
+  score       Float
+  isPassed    Boolean
+
+  attemptedAt DateTime        @default(now())
+}
