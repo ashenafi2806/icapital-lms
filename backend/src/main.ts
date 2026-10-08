@@ -9,10 +9,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.enableCors({
     origin: [
-      'http://localhost:3000',
-      ...(process.env.ADMIN_WEB_ORIGIN
-        ? [process.env.ADMIN_WEB_ORIGIN]
-        : []),
+      'https://icapital-9r908mpwh-ashenafibizukork-gmailcoms-projects.vercel.app/login'
     ],
   });
   await app.listen(process.env.PORT ?? 3000);
