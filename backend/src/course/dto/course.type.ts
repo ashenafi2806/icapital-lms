@@ -13,4 +13,7 @@ export class CourseType {
 
   @Field(() => Int)
   stepOrder!: number;
+
+  @Field(() => Int)
+  examsCount!: number;
 }
