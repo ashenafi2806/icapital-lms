@@ -1,0 +1,26 @@
+# Environments
+.env
+.env.*
+!.env.example
+
+# Node.js (NestJS / Next.js)
+node_modules/
+dist/
+.next/
+out/
+build/
+
+# Prisma
+*.db
+*.db-journal
+
+# Flutter / Mobile
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+.idea/
+.vscode/
+*.iml
