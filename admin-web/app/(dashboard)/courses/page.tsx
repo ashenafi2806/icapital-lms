@@ -79,7 +79,12 @@ export default function CoursesPage() {
         undefined,
         token,
       );
-      setCourses(response.getCourses);
+      setCourses(
+        (response.getCourses ?? []).map((course) => ({
+          ...course,
+          exams: Array.isArray(course.exams) ? course.exams : [],
+        })),
+      );
       setError(null);
     } catch (cause: unknown) {
       setError(

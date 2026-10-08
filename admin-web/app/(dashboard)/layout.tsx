@@ -3,10 +3,11 @@
 import { useRouter } from "next/navigation";
 import { type ReactNode, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import DashboardShell from "@/components/DashboardShell";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -23,22 +24,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-100">
-      {/* UX guard only; the backend enforces authentication and roles. */}
-      <header className="flex items-center justify-between border-b bg-white px-6 py-4">
-        <span className="font-medium text-zinc-900">Admin portal</span>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-zinc-600">{user.email}</span>
-          <button
-            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-            type="button"
-            onClick={logout}
-          >
-            Logout
-          </button>
-        </div>
-      </header>
-      <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
-    </div>
+    // UX guard only; the backend enforces authentication and roles.
+    <DashboardShell>{children}</DashboardShell>
   );
 }
