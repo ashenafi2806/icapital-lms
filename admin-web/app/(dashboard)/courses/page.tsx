@@ -217,12 +217,14 @@ export default function CoursesPage() {
               key={course.id}
               className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm"
             >
-              <p className="text-xs font-medium uppercase tracking-wide text-indigo-600">
-                Step {course.stepOrder}
-              </p>
-              <h2 className="mt-2 text-lg font-semibold text-gray-900">
-                {course.title}
-              </h2>
+              <Link href={`/courses/${course.id}`} className="block">
+                <p className="text-xs font-medium uppercase tracking-wide text-indigo-600">
+                  Step {course.stepOrder}
+                </p>
+                <h2 className="mt-2 text-lg font-semibold text-gray-900 hover:text-indigo-700">
+                  {course.title}
+                </h2>
+              </Link>
               <p className="mt-2 text-sm leading-6 text-gray-600">
                 {course.description}
               </p>

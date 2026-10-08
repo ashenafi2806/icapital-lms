@@ -6,6 +6,7 @@ import { Roles } from '../auth/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
 import { CourseService } from './course.service.js';
+import { CourseDetailType } from './dto/course-detail.type.js';
 import { CourseType } from './dto/course.type.js';
 import { CreateCourseInput } from './dto/create-course.input.js';
 
@@ -26,5 +27,14 @@ export class CourseResolver {
   @UseGuards(JwtAuthGuard)
   getCourses(@CurrentUser() _user: { sub: string }): Promise<CourseType[]> {
     return this.courseService.findAll();
+  }
+
+  @Query(() => CourseDetailType)
+  @UseGuards(JwtAuthGuard)
+  getCourse(
+    @Args('id', { type: () => String }) id: string,
+    @CurrentUser() _user: { sub: string },
+  ): Promise<CourseDetailType> {
+    return this.courseService.findById(id);
   }
 }

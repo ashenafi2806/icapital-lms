@@ -1,5 +1,6 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { CourseDetailType } from './dto/course-detail.type.js';
 import { CreateCourseInput } from './dto/create-course.input.js';
 import { CourseType } from './dto/course.type.js';
 
@@ -44,5 +45,57 @@ export class CourseService {
         questionCount: Array.isArray(exam.questions) ? exam.questions.length : 0,
       })),
     }));
+  }
+
+  async findById(id: string): Promise<CourseDetailType> {
+    const course = await this.prisma.course.findUnique({
+      where: { id },
+      include: { exams: true },
+    });
+
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+
+    return {
+      id: course.id,
+      title: course.title,
+      description: course.description,
+      stepOrder: course.stepOrder,
+      exams: course.exams.map((exam) => ({
+        id: exam.id,
+        courseId: exam.courseId,
+        title: exam.title,
+        passingThreshold: exam.passingThreshold,
+        questions: this.parseQuestions(exam.questions),
+      })),
+    };
+  }
+
+  private parseQuestions(value: unknown): Array<{
+    text: string;
+    options: string[];
+    correctIndex: number;
+  }> {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+
+    return value.filter(
+      (question): question is {
+        text: string;
+        options: string[];
+        correctIndex: number;
+      } =>
+        typeof question === 'object' &&
+        question !== null &&
+        'text' in question &&
+        typeof question.text === 'string' &&
+        'options' in question &&
+        Array.isArray(question.options) &&
+        question.options.every((option: unknown) => typeof option === 'string') &&
+        'correctIndex' in question &&
+        typeof question.correctIndex === 'number',
+    );
   }
 }
