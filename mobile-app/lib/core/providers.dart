@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../features/auth/providers/auth_provider.dart';
 import 'graphql_client.dart';
 
 final graphqlClientProvider = Provider<GraphQLClient>((ref) {
-  // TODO: Connect this provider to the token stored by the auth feature.
-  return GraphQLClient(tokenProvider: () => null);
+  return GraphQLClient(
+    tokenProvider: () => ref.read(authProvider).asData?.value?.token,
+  );
 });
