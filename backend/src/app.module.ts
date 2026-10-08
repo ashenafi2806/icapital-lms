@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { CourseModule } from './course/course.module.js';
 import { ExamModule } from './exam/exam.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { StudentModule } from './student/student.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -24,6 +25,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     AuthModule,
     CourseModule,
     ExamModule,
+    StudentModule,
     // Distributed tracing, auto-correlated logs, request/job metrics, error
     // telemetry, alarms, and more — out of the box. Sign up at https://observe.nestjs.com
     ObserveModule.forRoot({
