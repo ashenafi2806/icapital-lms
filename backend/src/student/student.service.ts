@@ -7,16 +7,45 @@ import { StudentType } from './dto/student.type.js';
 export class StudentService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll(): Promise<StudentType[]> {
-    return this.prisma.user.findMany({
+  async findAll(): Promise<StudentType[]> {
+    const totalCourseCount = await this.prisma.course.count();
+    const students = await this.prisma.user.findMany({
       where: { role: Role.STUDENT },
       orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        createdAt: true,
+      include: {
+        progress: {
+          include: { course: true },
+        },
+        attempts: true,
       },
+    });
+
+    return students.map((student) => {
+      const progress = student.progress.map((item) => {
+        const attempts = student.attempts.filter(
+          (attempt) => attempt.progressId === item.id,
+        );
+        const bestScore = attempts.reduce<number | null>(
+          (best, attempt) => (best === null || attempt.score > best ? attempt.score : best),
+          null,
+        );
+        return {
+          courseTitle: item.course.title,
+          status: item.status,
+          isPassed: item.isPassed,
+          bestScore,
+          attempts: attempts.length,
+        };
+      });
+      return {
+        id: student.id,
+        email: student.email,
+        role: student.role,
+        createdAt: student.createdAt,
+        progress,
+        passedCourseCount: progress.filter((item) => item.isPassed).length,
+        totalCourseCount,
+      };
     });
   }
 }
