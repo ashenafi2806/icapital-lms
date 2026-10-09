@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/course.dart';
 import '../providers/courses_provider.dart';
+import 'course_detail_screen.dart';
 import '../widgets/status_badge.dart';
 
 class CourseListScreen extends ConsumerWidget {
@@ -73,26 +74,33 @@ class _CourseContent extends StatelessWidget {
         ...courses.map(
           (course) => Card(
             margin: const EdgeInsets.only(bottom: 12),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Step ${course.stepOrder}: ${course.title}',
-                          style: Theme.of(context).textTheme.titleLarge,
+            child: InkWell(
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => CourseDetailScreen(courseId: course.id),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Step ${course.stepOrder}: ${course.title}',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
                         ),
-                      ),
-                      StatusBadge(status: course.status),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(course.description),
-                ],
+                        StatusBadge(status: course.status),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(course.description),
+                  ],
+                ),
               ),
             ),
           ),
