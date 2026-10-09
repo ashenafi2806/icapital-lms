@@ -15,7 +15,7 @@ class User {
     return User(
       id: _requiredString(json, 'id'),
       email: _requiredString(json, 'email'),
-      name: json['name'] is String ? json['name'] as String : null,
+      name: json['name'] is String ? json['name'] as String? : null,
       role: _requiredString(json, 'role'),
     );
   }

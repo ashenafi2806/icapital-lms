@@ -5,12 +5,11 @@ import '../models/course.dart';
 
 const _coursesDocument = '''
   query Courses {
-    courses {
+    getCourses {
       id
       title
       description
       stepOrder
-      status
     }
   }
 ''';
@@ -19,7 +18,7 @@ final coursesProvider = FutureProvider<List<Course>>((ref) async {
   final response = await ref
       .read(graphqlClientProvider)
       .query(_coursesDocument);
-  final courses = response['courses'];
+  final courses = response['getCourses'];
   if (courses is! List<Object?>) {
     throw const FormatException('Invalid courses response');
   }

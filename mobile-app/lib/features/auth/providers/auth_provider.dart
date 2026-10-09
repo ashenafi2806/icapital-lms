@@ -74,7 +74,7 @@ class AuthNotifier extends AsyncNotifier<AuthState?> {
         mutation Login(\$input: LoginInput!) {
           login(input: \$input) {
             accessToken
-            user { id email name role }
+            user { id email role }
           }
         }
       ''',
@@ -84,23 +84,19 @@ class AuthNotifier extends AsyncNotifier<AuthState?> {
     );
   }
 
-  Future<void> register(String name, String email, String password) async {
+  Future<void> register(String email, String password) async {
     await _authenticate(
       responseKey: 'register',
       document: '''
         mutation Register(\$input: RegisterInput!) {
           register(input: \$input) {
             accessToken
-            user { id email name role }
+            user { id email role }
           }
         }
       ''',
       variables: <String, dynamic>{
-        'input': <String, dynamic>{
-          'name': name,
-          'email': email,
-          'password': password,
-        },
+        'input': <String, dynamic>{'email': email, 'password': password},
       },
     );
   }
