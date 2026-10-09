@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/course_detail.dart';
-import '../models/exam.dart';
 import '../providers/course_detail_provider.dart';
+import '../../exam/screens/quiz_screen.dart';
 
 class CourseDetailScreen extends ConsumerWidget {
   const CourseDetailScreen({required this.courseId, super.key});
@@ -66,7 +66,11 @@ class _CourseDetails extends StatelessWidget {
                 trailing: FilledButton(
                   onPressed: exam.questions.isEmpty
                       ? null
-                      : () => _showQuizUnavailable(context, exam),
+                      : () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => QuizScreen(exam: exam),
+                          ),
+                        ),
                   child: const Text('Start'),
                 ),
               ),
@@ -74,11 +78,6 @@ class _CourseDetails extends StatelessWidget {
           ),
       ],
     );
-  }
-
-  void _showQuizUnavailable(BuildContext context, Exam exam) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Starting ${exam.title}...')));
   }
 }
 
