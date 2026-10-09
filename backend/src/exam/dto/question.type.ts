@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class QuestionType {
@@ -8,6 +8,4 @@ export class QuestionType {
   @Field(() => [String])
   options!: string[];
 
-  @Field(() => Int)
-  correctIndex!: number;
 }
