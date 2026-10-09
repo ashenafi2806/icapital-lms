@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../courses/models/exam.dart';
+import '../../courses/providers/course_detail_provider.dart';
+import '../../courses/providers/courses_provider.dart';
 import '../providers/quiz_provider.dart';
+import 'result_screen.dart';
 
 class QuizScreen extends ConsumerStatefulWidget {
   const QuizScreen({required this.exam, super.key});
@@ -29,17 +32,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       if (!mounted) {
         return;
       }
-      await showDialog<void>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(result.isPassed ? 'Passed' : 'Not passed'),
-          content: Text('Score: ${result.score.toStringAsFixed(1)}%'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
-            ),
-          ],
+      ref.invalidate(coursesProvider);
+      ref.invalidate(courseDetailProvider(widget.exam.courseId));
+      await Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (_) => ResultScreen(exam: widget.exam, result: result),
         ),
       );
     } catch (error) {
