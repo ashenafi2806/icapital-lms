@@ -1,5 +1,6 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { ExamSummaryType } from '../../exam/dto/exam-summary.type.js';
+import { CourseProgressStatus } from './progress-status.enum.js';
 
 @ObjectType()
 export class CourseType {
@@ -20,4 +21,7 @@ export class CourseType {
 
   @Field(() => [ExamSummaryType])
   exams!: ExamSummaryType[];
+
+  @Field(() => CourseProgressStatus)
+  status!: CourseProgressStatus;
 }

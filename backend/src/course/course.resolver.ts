@@ -25,16 +25,16 @@ export class CourseResolver {
 
   @Query(() => [CourseType])
   @UseGuards(JwtAuthGuard)
-  getCourses(@CurrentUser() _user: { sub: string }): Promise<CourseType[]> {
-    return this.courseService.findAll();
+  getCourses(@CurrentUser() user: { sub: string }): Promise<CourseType[]> {
+    return this.courseService.findAll(user.sub);
   }
 
   @Query(() => CourseDetailType)
   @UseGuards(JwtAuthGuard)
   getCourse(
     @Args('id', { type: () => String }) id: string,
-    @CurrentUser() _user: { sub: string },
+    @CurrentUser() user: { sub: string },
   ): Promise<CourseDetailType> {
-    return this.courseService.findById(id);
+    return this.courseService.findById(id, user.sub);
   }
 }

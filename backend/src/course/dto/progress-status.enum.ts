@@ -1,0 +1,11 @@
+import { registerEnumType } from '@nestjs/graphql';
+
+export enum CourseProgressStatus {
+  NOT_STARTED = 'NOT_STARTED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+}
+
+registerEnumType(CourseProgressStatus, {
+  name: 'ProgressStatus',
+});
