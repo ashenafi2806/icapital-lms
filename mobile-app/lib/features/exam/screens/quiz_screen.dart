@@ -4,14 +4,58 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../courses/models/exam.dart';
 import '../providers/quiz_provider.dart';
 
-class QuizScreen extends ConsumerWidget {
+class QuizScreen extends ConsumerStatefulWidget {
   const QuizScreen({required this.exam, super.key});
 
   final Exam exam;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final quiz = ref.watch(quizProvider(exam));
+  ConsumerState<QuizScreen> createState() => _QuizScreenState();
+}
+
+class _QuizScreenState extends ConsumerState<QuizScreen> {
+  bool _submitting = false;
+  String? _error;
+
+  Future<void> _submit() async {
+    setState(() {
+      _submitting = true;
+      _error = null;
+    });
+    try {
+      final result = await ref
+          .read(quizProvider(widget.exam).notifier)
+          .submit();
+      if (!mounted) {
+        return;
+      }
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(result.isPassed ? 'Passed' : 'Not passed'),
+          content: Text('Score: ${result.score.toStringAsFixed(1)}%'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      );
+    } catch (error) {
+      if (mounted) {
+        setState(() => _error = error.toString());
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _submitting = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final quiz = ref.watch(quizProvider(widget.exam));
     final question = quiz.exam.questions[quiz.currentIndex];
     final questionCount = quiz.exam.questions.length;
     final progress = (quiz.currentIndex + 1) / questionCount;
@@ -34,7 +78,9 @@ class QuizScreen extends ConsumerWidget {
               groupValue: quiz.answers[quiz.currentIndex],
               onChanged: (value) {
                 if (value != null) {
-                  ref.read(quizProvider(exam).notifier).selectOption(value);
+                  ref
+                      .read(quizProvider(widget.exam).notifier)
+                      .selectOption(value);
                 }
               },
               child: Column(
@@ -50,28 +96,46 @@ class QuizScreen extends ConsumerWidget {
                     .toList(),
               ),
             ),
+            if (_error != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                _error!,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            ],
             const SizedBox(height: 24),
             Row(
               children: [
                 OutlinedButton(
-                  onPressed: quiz.currentIndex == 0
+                  onPressed: _submitting || quiz.currentIndex == 0
                       ? null
-                      : () => ref.read(quizProvider(exam).notifier).previous(),
+                      : () => ref
+                            .read(quizProvider(widget.exam).notifier)
+                            .previous(),
                   child: const Text('Back'),
                 ),
                 const Spacer(),
                 if (quiz.currentIndex < questionCount - 1)
                   FilledButton(
-                    onPressed: () =>
-                        ref.read(quizProvider(exam).notifier).next(),
+                    onPressed: _submitting
+                        ? null
+                        : () => ref
+                              .read(quizProvider(widget.exam).notifier)
+                              .next(),
                     child: const Text('Next'),
                   )
                 else
                   FilledButton(
-                    onPressed: quiz.allAnswered
-                        ? () => _showNotWiredMessage(context)
-                        : null,
-                    child: const Text('Submit'),
+                    onPressed: _submitting || !quiz.allAnswered
+                        ? null
+                        : _submit,
+                    child: _submitting
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Submit'),
                   ),
               ],
             ),
@@ -79,10 +143,5 @@ class QuizScreen extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  void _showNotWiredMessage(BuildContext context) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('Submitting quiz...')));
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/providers.dart';
 import '../../courses/models/exam.dart';
+import '../models/exam_result.dart';
 
 class QuizState {
   const QuizState({
@@ -57,5 +59,40 @@ class QuizNotifier extends Notifier<QuizState> {
     if (state.currentIndex < state.exam.questions.length - 1) {
       state = state.copyWith(currentIndex: state.currentIndex + 1);
     }
+  }
+
+  Future<ExamResult> submit() async {
+    if (!state.allAnswered) {
+      throw const FormatException('Answer every question before submitting.');
+    }
+    final response = await ref
+        .read(graphqlClientProvider)
+        .mutate(
+          '''
+          mutation SubmitExam(\$input: SubmitExamInput!) {
+            submitExam(input: \$input) {
+              score
+              isPassed
+            }
+          }
+        ''',
+          variables: <String, dynamic>{
+            'input': <String, dynamic>{
+              'examId': state.exam.id,
+              'answers': state.answers.map((answer) => answer ?? 0).toList(),
+            },
+          },
+        );
+    final result = response['submitExam'];
+    if (result is! Map<Object?, Object?>) {
+      throw const FormatException('Invalid exam result response');
+    }
+    return ExamResult.fromJson(
+      Map<String, dynamic>.fromEntries(
+        result.entries
+            .where((entry) => entry.key is String)
+            .map((entry) => MapEntry(entry.key as String, entry.value)),
+      ),
+    );
   }
 }
