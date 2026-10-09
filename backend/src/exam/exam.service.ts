@@ -80,28 +80,42 @@ export class ExamService {
     const isPassed = score >= exam.passingThreshold;
 
     await this.prisma.$transaction(async (tx) => {
-      const progress = await tx.studentProgress.upsert({
+      const existingProgress = await tx.studentProgress.findUnique({
         where: {
           userId_courseId: {
             userId,
             courseId: exam.courseId,
           },
         },
-        create: {
-          userId,
-          courseId: exam.courseId,
-          score,
-          isPassed,
-          status: isPassed ? ProgressStatus.COMPLETED : ProgressStatus.IN_PROGRESS,
-          completedAt: isPassed ? new Date() : null,
-        },
-        update: {
-          score,
-          isPassed,
-          status: isPassed ? ProgressStatus.COMPLETED : ProgressStatus.IN_PROGRESS,
-          completedAt: isPassed ? new Date() : null,
-        },
       });
+      const progress = existingProgress?.status === ProgressStatus.COMPLETED
+        ? existingProgress
+        : await tx.studentProgress.upsert({
+            where: {
+              userId_courseId: {
+                userId,
+                courseId: exam.courseId,
+              },
+            },
+            create: {
+              userId,
+              courseId: exam.courseId,
+              score,
+              isPassed,
+              status: isPassed
+                ? ProgressStatus.COMPLETED
+                : ProgressStatus.IN_PROGRESS,
+              completedAt: isPassed ? new Date() : null,
+            },
+            update: {
+              score,
+              isPassed,
+              status: isPassed
+                ? ProgressStatus.COMPLETED
+                : ProgressStatus.IN_PROGRESS,
+              completedAt: isPassed ? new Date() : null,
+            },
+          });
 
       await tx.examAttempt.create({
         data: {
