@@ -11,7 +11,7 @@ async function bootstrap() {
   const configuredOrigins = (
     process.env.FRONTEND_URLS ??
     process.env.FRONTEND_URL ??
-    'https://icapital-9r908mpwh-ashenafibizukork-gmailcoms-projects.vercel.app'
+    'https://icapital-lms.vercel.app'
   )
     .split(',')
     .map((origin) => origin.trim().replace(/\/+$/, ''))
